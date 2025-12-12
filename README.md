@@ -1,13 +1,73 @@
 # AI Contract Auditor
 
-Sistema de auditoría de contratos con IA (LangChain + Gemini) que extrae información de PDFs y valida reglas de negocio.
+Sistema inteligente de auditoría de contratos legales que utiliza IA para automatizar la extracción de información clave desde documentos PDF y validar el cumplimiento de reglas de negocio.
+
+## ¿Qué hace este proyecto?
+
+1. **Extrae información automáticamente** de contratos PDF usando Google Gemini (LLM)
+2. **Identifica datos clave**: partes involucradas, fechas, duración, jurisdicción
+3. **Evalúa el riesgo** del contrato basado en el lenguaje utilizado
+4. **Valida reglas de negocio** y marca contratos que requieren revisión humana
+5. **Permite correcciones humanas** a través de una interfaz web
 
 ## Stack
 
 - **Backend**: Python + FastAPI + LangChain + Google Gemini
 - **Frontend**: React + TypeScript + Vite
 - **Database**: SQLite + SQLAlchemy
-- **Dataset**: CUAD (HuggingFace)
+- **Dataset**: CUAD (HuggingFace) - 510 contratos legales reales
+
+## Arquitectura
+
+```
+┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐
+│    Frontend     │────▶│  FastAPI Backend │────▶│     SQLite      │
+│  (React + TS)   │     │    (uvicorn)     │     │  (contracts.db) │
+└─────────────────┘     └────────┬─────────┘     └─────────────────┘
+                                 │
+                    ┌────────────┼────────────┐
+                    ▼            ▼            ▼
+              ┌──────────┐ ┌──────────┐ ┌──────────┐
+              │   PDF    │ │LangChain │ │Validation│
+              │ Extractor│ │ + Gemini │ │  Agent   │
+              └──────────┘ └──────────┘ └──────────┘
+```
+
+## Flujo de Procesamiento
+
+```
+┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+│  1. Upload  │───▶│ 2. Extraer  │───▶│ 3. Extraer  │───▶│ 4. Validar  │
+│    PDF      │    │    Texto    │    │  Datos IA   │    │   Reglas    │
+└─────────────┘    └─────────────┘    └─────────────┘    └──────┬──────┘
+                                                                │
+                   ┌─────────────┐    ┌─────────────┐           │
+                   │ 6. Revisar  │◀───│ 5. Guardar  │◀──────────┘
+                   │  (Usuario)  │    │     BD      │
+                   └─────────────┘    └─────────────┘
+```
+
+**Detalle de cada paso:**
+
+1. **Upload PDF**: Usuario sube un contrato o se carga desde HuggingFace (dataset CUAD)
+2. **Extraer Texto**: pdfplumber extrae el texto del documento PDF
+3. **Extraer Datos con IA**: LangChain + Gemini analiza el texto y extrae:
+   - Partes del contrato (nombres y roles)
+   - Fecha efectiva
+   - Duración del contrato
+   - Jurisdicción
+   - Score de riesgo (1-100)
+4. **Validar Reglas**: El agente de validación verifica reglas de negocio
+5. **Guardar en BD**: Se almacena el contrato con sus datos extraídos
+6. **Revisar**: El usuario puede ver, corregir y aprobar en el frontend
+
+## Reglas de Negocio
+
+| Regla | Condición | Acción |
+|-------|-----------|--------|
+| Duración excesiva | > 24 meses | REQUIRES_HUMAN_REVIEW |
+| Jurisdicción extranjera | != Chile | REQUIRES_HUMAN_REVIEW |
+| Riesgo alto | risk_score > 70 | REQUIRES_HUMAN_REVIEW |
 
 ## Requisitos
 
@@ -91,16 +151,8 @@ curl -X POST "http://localhost:8000/api/contracts/load-sample?n=3"
 | POST | `/api/audit` | Subir PDF para procesar |
 | GET | `/api/contracts` | Listar contratos |
 | GET | `/api/contracts/{id}` | Ver contrato |
-| PUT | `/api/contracts/{id}` | Editar contrato |
+| PUT | `/api/contracts/{id}` | Editar contrato (corrección humana) |
 | POST | `/api/contracts/load-sample?n=N` | Cargar N contratos de HuggingFace |
-
-## Reglas de Negocio
-
-| Regla | Condición | Acción |
-|-------|-----------|--------|
-| Duración excesiva | > 24 meses | REQUIRES_HUMAN_REVIEW |
-| Jurisdicción extranjera | != Chile | REQUIRES_HUMAN_REVIEW |
-| Riesgo alto | risk_score > 70 | REQUIRES_HUMAN_REVIEW |
 
 ---
 
@@ -124,9 +176,3 @@ Estrategia de 4 capas:
 1. **Few-Shot dinámico**: Agregar ejemplos de correcciones recientes al prompt
 2. **Fine-tuning periódico**: Con 500+ correcciones, entrenar modelo personalizado
 3. **Reglas aprendidas**: Detectar patrones de error y crear reglas de post-procesamiento
-
----
-
-## Licencia
-
-MIT
