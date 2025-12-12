@@ -20,7 +20,7 @@ Sistema de auditoría de contratos con IA (LangChain + Gemini) que extrae inform
 ### 1. Clonar el repositorio
 
 ```bash
-git clone https://github.com/tu-usuario/ai-contract-auditor.git
+git clone https://github.com/CatalinaOlivares/ai-contract-auditor.git
 cd ai-contract-auditor
 ```
 
@@ -53,6 +53,8 @@ cd ..
 ```
 
 ## Ejecución
+
+> **Nota:** La base de datos SQLite (`contracts.db`) se crea automáticamente al iniciar el backend por primera vez.
 
 ### Terminal 1 - Backend
 
