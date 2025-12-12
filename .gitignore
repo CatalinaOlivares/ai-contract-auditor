@@ -1,0 +1,36 @@
+# Python
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+
+# Node
+node_modules/
+npm-debug.log
+
+# Environment
+.env
+
+# Database
+*.db
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Cache
+.cache/
+*.cache
+
+# HuggingFace datasets cache
+~/.cache/huggingface/
