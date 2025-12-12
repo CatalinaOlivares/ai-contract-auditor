@@ -154,6 +154,48 @@ curl -X POST "http://localhost:8000/api/contracts/load-sample?n=3"
 | PUT | `/api/contracts/{id}` | Editar contrato (corrección humana) |
 | POST | `/api/contracts/load-sample?n=N` | Cargar N contratos de HuggingFace |
 
+## Ejemplos de Prueba
+
+### 1. Verificar que el sistema está funcionando
+
+```bash
+curl http://localhost:8000/health
+```
+
+Respuesta esperada:
+```json
+{"status":"healthy","database":"connected","llm_configured":true}
+```
+
+### 2. Cargar contratos de prueba desde HuggingFace
+
+```bash
+curl -X POST "http://localhost:8000/api/contracts/load-sample?n=3"
+```
+
+Esto descarga 3 contratos reales del dataset CUAD y los procesa con IA.
+
+### 3. Ver todos los contratos
+
+```bash
+curl http://localhost:8000/api/contracts
+```
+
+### 4. Subir tu propio PDF
+
+```bash
+curl -X POST "http://localhost:8000/api/audit" \
+  -F "file=@/ruta/a/tu/contrato.pdf"
+```
+
+### 5. Probar desde el navegador
+
+1. Abrir http://localhost:5173
+2. Ver la lista de contratos procesados
+3. Hacer clic en un contrato para ver los detalles
+4. Editar los datos extraídos si es necesario
+5. Aprobar el contrato
+
 ---
 
 # Preguntas de Arquitectura
